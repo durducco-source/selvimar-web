@@ -99,7 +99,8 @@
       "@context": "https://schema.org",
       "@type": "ProfessionalService",
       "name": get("empresa.nombre") || "SELVIMAR",
-      "description": "Empresa de limpieza profesional en Lloret de Mar: viviendas, villas, apartamentos turísticos, hoteles y negocios en la Costa Brava.",
+      "description": "Empresa de limpieza profesional en Lloret de Mar y Costa Brava: limpieza de hoteles, apartamentos turísticos, oficinas, comunidades, restaurantes, discotecas y limpieza de obra.",
+      "knowsAbout": ["Limpieza de hoteles", "Limpieza de apartamentos turísticos", "Limpieza de oficinas", "Limpieza de comunidades", "Limpieza de restaurantes", "Limpieza de discotecas", "Limpieza de obra", "Servicios de limpieza profesional"],
       "url": get("empresa.url"),
       "telephone": "+34" + String(get("contacto.telefono") || "").replace(/\D/g, ""),
       "image": (get("empresa.url") || "") + "/assets/img/og-image.jpg",
@@ -269,7 +270,7 @@
         if (el.name && el.name !== "privacidad" && el.name !== "_gotcha") d[el.name] = el.value.trim();
       }); return d;
     }
-    var LABELS = { nombre: "Nombre", telefono: "Teléfono", email: "Email", tipo_propiedad: "Tipo de propiedad", servicio: "Servicio", frecuencia: "Frecuencia", fecha: "Fecha aproximada", zona: "Zona", mensaje: "Mensaje" };
+    var LABELS = { nombre: "Nombre", telefono: "Teléfono", email: "Email", empresa: "Empresa", tipo_establecimiento: "Tipo de establecimiento", servicio: "Servicio", frecuencia: "Frecuencia", fecha: "Fecha aproximada", zona: "Zona", mensaje: "Mensaje" };
     function asText(d) {
       var lines = ["Hola, me gustaría solicitar un presupuesto."];
       Object.keys(LABELS).forEach(function (k) { if (d[k]) lines.push(LABELS[k] + ": " + d[k]); });

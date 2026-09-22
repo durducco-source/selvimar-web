@@ -31,7 +31,7 @@ window.SELVIMAR_CONFIG = {
     whatsapp: "34678783274",
 
     // Mensaje que aparece escrito al abrir WhatsApp
-    whatsappMensaje: "Hola, me gustaría solicitar un presupuesto de limpieza.",
+    whatsappMensaje: "Hola, me gustaría solicitar un presupuesto de limpieza para mi empresa.",
 
     // ⚠ PENDIENTE: escribe aquí el email real de la empresa
     email: "info@tudominio.com",
