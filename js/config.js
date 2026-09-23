@@ -34,7 +34,7 @@ window.SELVIMAR_CONFIG = {
     whatsappMensaje: "Hola, me gustaría solicitar un presupuesto de limpieza para mi empresa.",
 
     // ⚠ PENDIENTE: escribe aquí el email real de la empresa
-    email: "info@tudominio.com",
+    email: "selvimar2004@gmail.com",
 
     // Redes sociales. Deja "" (vacío) si no la usas: el enlace se oculta solo.
     // Ejemplo Instagram: "https://www.instagram.com/tu_usuario"
