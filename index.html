@@ -24,9 +24,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
-<script>document.documentElement.className='js';</script>
+<script>(function(){var c='js';try{if(sessionStorage.getItem('sv_intro'))c+=' intro-seen';sessionStorage.setItem('sv_intro','1')}catch(e){}document.documentElement.className=c})();</script>
 </head>
 <body>
+<div class="intro" aria-hidden="true"><span class="intro-name">SELVIMAR</span><span class="intro-line"></span><span class="intro-sub">Serveis Integrals de Neteja</span></div>
+<div class="progress" aria-hidden="true"><span data-progress></span></div>
 <a class="skip" href="#main">Saltar al contenido</a>
 <header class="header" id="top">
   <div class="container">
@@ -50,24 +52,54 @@
 <main id="main">
 
   <!-- ============================== HERO ============================== -->
-  <section class="hero" id="inicio" aria-label="Presentación">
-    <div class="hero-media" data-parallax>
-      <!-- FOTO PRINCIPAL: sustituye assets/img/hero.jpg por tu foto real (ver README, paso 5) -->
-      <img src="assets/img/hero.jpg" alt="Vestíbulo de hotel de lujo con suelos de mármol pulido y luz natural, impecable" width="2400" height="1500" fetchpriority="high">
-    </div>
-    <div class="container hero-inner">
-      <div class="hero-stagger">
-        <h1>La excelencia se nota en <em>cada detalle.</em></h1>
-        <p class="hero-text">Empresa de limpieza profesional para hoteles, apartamentos turísticos, oficinas, comunidades, restaurantes, locales de ocio y obras en Lloret de Mar y toda la Costa Brava.</p>
-        <div class="hero-cta">
-          <a class="btn btn--solid" href="#contacto" data-cta>Solicitar presupuesto</a>
-          <a class="btn btn--line" href="#servicios">Ver servicios</a>
+  <!-- La portada es una secuencia de escenas que avanzan al hacer scroll.
+       Para cambiar una escena, sustituye su imagen (la primera es la foto principal). -->
+  <section class="hero" id="inicio" aria-label="Presentación" data-hero>
+    <div class="hero-stage">
+      <div class="hero-frame" data-hero-frame>
+        <div class="hero-media">
+          <!-- FOTO PRINCIPAL: sustituye assets/img/hero.jpg por tu foto real (ver README, paso 5) -->
+          <div class="hero-scene" data-scene><img src="assets/img/hero.jpg" alt="Vestíbulo de hotel de lujo con suelos de mármol pulido y luz natural, impecable" width="2400" height="1500" fetchpriority="high"></div>
+          <div class="hero-scene" data-scene aria-hidden="true"><img src="assets/img/servicio-apartamentos-turisticos.jpg" alt="" width="1600" height="1000" loading="lazy" decoding="async"></div>
+          <div class="hero-scene" data-scene aria-hidden="true"><img src="assets/img/servicio-oficinas.jpg" alt="" width="1600" height="1000" loading="lazy" decoding="async"></div>
+          <div class="hero-scene" data-scene aria-hidden="true"><img src="assets/img/servicio-restaurantes.jpg" alt="" width="1600" height="1000" loading="lazy" decoding="async"></div>
         </div>
-        <div class="hero-tags"><span>Hoteles y empresas</span><span>Personal cualificado</span><span>Atención personalizada</span></div>
+      </div>
+      <div class="hero-content" data-hero-content>
+        <div class="container hero-inner">
+          <div class="hero-stagger">
+            <h1 data-split>La excelencia se nota en <em>cada detalle.</em></h1>
+            <p class="hero-text">Empresa de limpieza profesional para hoteles, apartamentos turísticos, oficinas, comunidades, restaurantes, locales de ocio y obras en Lloret de Mar y toda la Costa Brava.</p>
+            <div class="hero-cta">
+              <a class="btn btn--solid" href="#contacto" data-cta>Solicitar presupuesto</a>
+              <a class="btn btn--line" href="#servicios">Ver servicios</a>
+            </div>
+            <div class="hero-tags"><span>Hoteles y empresas</span><span>Personal cualificado</span><span>Atención personalizada</span></div>
+          </div>
+        </div>
+        <div class="hero-index" aria-hidden="true">
+          <span class="hero-count"><b data-scene-n>01</b> / 04</span>
+          <ol class="hero-labels">
+            <li class="is-active">Hoteles</li><li>Apartamentos turísticos</li><li>Oficinas y empresas</li><li>Restauración y ocio</li>
+          </ol>
+          <span class="hero-bar"><i data-scene-bar></i></span>
+        </div>
+        <span class="hero-side" aria-hidden="true">Lloret de Mar · Costa Brava</span>
+        <span class="hero-scroll" aria-hidden="true"><i></i>Desliza</span>
       </div>
     </div>
-    <span class="hero-side" aria-hidden="true">Lloret de Mar · Costa Brava</span>
-    <span class="hero-scroll" aria-hidden="true"></span>
+  </section>
+
+  <!-- ============================ MANIFIESTO ============================ -->
+  <section class="manifesto" aria-label="Nuestra filosofía">
+    <div class="container">
+      <span class="eyebrow reveal">SELVIMAR · Lloret de Mar</span>
+      <p class="manifesto-text" data-words>No limpiamos metros cuadrados. Cuidamos la <em>imagen</em> de tu negocio.</p>
+      <div class="manifesto-foot reveal">
+        <p>Entendemos la limpieza como parte de la imagen de cada negocio y de la experiencia de sus clientes.</p>
+        <a class="link-btn" href="#servicios">Descubrir servicios <svg viewBox="0 0 18 10" aria-hidden="true"><path d="M0 5h16M12 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
+      </div>
+    </div>
   </section>
 
   <!-- ============================ SERVICIOS ============================ -->
@@ -180,11 +212,18 @@
     </div>
   </section>
 
+  <!-- Banda de servicios que se desliza al hacer scroll (decorativa) -->
+  <div class="band" aria-hidden="true">
+    <div class="band-track" data-band>
+      <span>Hoteles</span><span><em>Apartamentos turísticos</em></span><span>Oficinas</span><span><em>Comunidades</em></span><span>Restaurantes</span><span><em>Locales de ocio</em></span><span>Limpieza de obra</span><span><em>Costa Brava</em></span>
+    </div>
+  </div>
+
   <!-- ====================== SERVICIO INTEGRAL PARA EMPRESAS ====================== -->
   <section class="section concierge on-dark" id="empresas">
     <div class="container concierge-grid">
       <div class="concierge-media reveal reveal--left">
-        <img src="assets/img/concierge.jpg" alt="Recepción de hotel con mármol pulido y detalles dorados, impecable tras la limpieza" width="1600" height="1000" loading="lazy" decoding="async">
+        <div class="frame"><img src="assets/img/concierge.jpg" alt="Recepción de hotel con mármol pulido y detalles dorados, impecable tras la limpieza" width="1600" height="1000" loading="lazy" decoding="async"></div>
         <div class="concierge-badge"><small>Empresas</small>Siempre el mismo estándar.</div>
       </div>
       <div class="reveal reveal--right">
@@ -450,7 +489,7 @@
   <section class="section about" id="nosotros">
     <div class="container about-grid">
       <div class="about-media reveal reveal--left">
-        <img src="assets/img/sobre-nosotros.jpg" alt="Dos profesionales de limpieza uniformadas preparando una habitación de hotel luminosa" width="1600" height="1000" loading="lazy" decoding="async">
+        <div class="frame"><img src="assets/img/sobre-nosotros.jpg" alt="Dos profesionales de limpieza uniformadas preparando una habitación de hotel luminosa" width="1600" height="1000" loading="lazy" decoding="async"></div>
       </div>
       <div class="about-text reveal reveal--right">
         <span class="eyebrow">Sobre nosotros</span>

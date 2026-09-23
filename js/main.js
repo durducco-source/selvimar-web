@@ -115,8 +115,19 @@
 
   /* ---------- 2. Cabecera, menú móvil y sección activa ---------- */
   function initHeader() {
-    var header = $(".header"), burger = $(".burger");
-    var onScroll = function () { header.classList.toggle("is-scrolled", window.scrollY > 40); };
+    var header = $(".header"), burger = $(".burger"), hero = $("[data-hero]"), lastY = window.scrollY;
+    /* Sobre la portada la cabecera es transparente; después se vuelve clara y
+       se esconde al bajar (reaparece al subir) para dejar todo el protagonismo al contenido. */
+    var onScroll = function () {
+      var y = window.scrollY;
+      var limit = hero ? Math.max(40, hero.offsetTop + hero.offsetHeight - window.innerHeight * 1.35) : 40;
+      header.classList.toggle("is-scrolled", y > limit);
+      if (!document.body.classList.contains("nav-open")) {
+        if (y > limit + 240 && y > lastY + 4) header.classList.add("is-hidden");
+        else if (y < lastY - 4 || y <= limit) header.classList.remove("is-hidden");
+      }
+      lastY = y;
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
 
@@ -147,8 +158,40 @@
   }
 
   /* ---------- 3. Animaciones al hacer scroll ---------- */
+
+  /* Divide un titular en palabras (respetando las cursivas) para que entren una a una */
+  function splitWords(el, cls) {
+    var n = 0;
+    (function walk(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function (ch) {
+        if (ch.nodeType === 1) { walk(ch); return; }
+        if (ch.nodeType !== 3 || !ch.textContent.trim()) return;
+        var frag = document.createDocumentFragment();
+        ch.textContent.split(/(\s+)/).forEach(function (part) {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          var w = document.createElement("span");
+          if (cls) { w.className = cls; w.textContent = part; }
+          else { w.className = "w"; w.style.setProperty("--wi", n); var inner = document.createElement("span"); inner.textContent = part; w.appendChild(inner); }
+          n++; frag.appendChild(w);
+        });
+        node.replaceChild(frag, ch);
+      });
+    })(el);
+    return n;
+  }
+  function initSplit() {
+    $$(".title, h1[data-split]").forEach(function (el) { splitWords(el); el.classList.add("split"); });
+    /* Las imágenes aparecen de forma progresiva (cortinilla) */
+    $$(".svc-img, .gal, .frame, .aud-item").forEach(function (el, i) {
+      el.classList.remove("reveal", "reveal--fade");
+      el.classList.add("img-in");
+      if (!el.style.getPropertyValue("--d")) el.style.setProperty("--d", ((i % 3) * 0.1).toFixed(2) + "s");
+    });
+  }
+
   function initReveal() {
-    var items = $$(".reveal, [data-steps]");
+    var items = $$(".reveal, [data-steps], .split:not(h1), .img-in");
     if (!("IntersectionObserver" in window) || reduce) { items.forEach(function (el) { el.classList.add("is-in"); }); return; }
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); } });
@@ -156,19 +199,93 @@
     items.forEach(function (el) { io.observe(el); });
   }
 
-  /* Ligero movimiento de profundidad en la foto principal */
-  function initParallax() {
-    var el = $("[data-parallax]"), hero = $(".hero");
-    if (!el || reduce) return;
-    var ticking = false;
-    window.addEventListener("scroll", function () {
-      if (ticking) return; ticking = true;
-      requestAnimationFrame(function () {
-        var y = window.scrollY, h = hero.offsetHeight;
-        if (y < h) el.style.transform = "translate3d(0," + (y * 0.16).toFixed(1) + "px,0)";
-        ticking = false;
+  /* Movimiento ligado al scroll: portada por escenas, parallax de imágenes,
+     frase del manifiesto, banda de servicios, entrada de secciones oscuras y barra de progreso. */
+  function clamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+  function initScrollFX() {
+    var bar = $("[data-progress]");
+    var words = [], mText = $("[data-words]");
+    if (mText) { splitWords(mText, "mw"); words = $$(".mw", mText); }
+    if (reduce) { words.forEach(function (w) { w.classList.add("is-on"); }); return; }
+
+    var hero = $("[data-hero]"), frame = $("[data-hero-frame]"), content = $("[data-hero-content]");
+    var scenes = $$("[data-scene]"), labels = $$(".hero-labels li"), sceneN = $("[data-scene-n]"), sceneBar = $("[data-scene-bar]");
+    var cue = $(".hero-scroll");
+    var pxImgs = $$(".svc-img img, .gal img, .frame img, .aud-item img");
+    pxImgs.forEach(function (im) { im.classList.add("px"); });
+    var darks = $$(".on-dark"), band = $("[data-band]");
+    var HOLD = 0.8, STEP = HOLD / 4, FADE = 0.08;   /* 4 escenas en el 80 % del recorrido; el 20 % final encoge el marco */
+    var lastScene = -1, ticking = false;
+
+    function heroFX(vh) {
+      if (!hero) return;
+      var r = hero.getBoundingClientRect();
+      if (r.bottom < 0) return;
+      var p = clamp(-r.top / (hero.offsetHeight - vh));
+      var cur = 0;
+      scenes.forEach(function (s, i) {
+        if (i === 0) { s.style.transform = "scale(" + (1 + 0.08 * clamp(p / (STEP * 2))).toFixed(4) + ")"; return; }
+        var b = i * STEP, t = clamp((p - (b - FADE)) / (FADE * 2));
+        var z = easeOut(clamp((p - (b - FADE)) / (STEP + FADE)));
+        s.style.clipPath = "inset(" + ((1 - easeOut(t)) * 100).toFixed(2) + "% 0 0 0)";
+        s.style.transform = "scale(" + (1.16 - 0.1 * z).toFixed(4) + ")";
+        if (p >= b) cur = i;
       });
-    }, { passive: true });
+      if (cur !== lastScene) {
+        lastScene = cur;
+        if (sceneN) sceneN.textContent = "0" + (cur + 1);
+        labels.forEach(function (l, i) { l.classList.toggle("is-active", i === cur); l.classList.toggle("is-past", i < cur); });
+      }
+      if (sceneBar) sceneBar.style.transform = "scaleX(" + clamp(p / HOLD).toFixed(4) + ")";
+      /* Final: la imagen se encoge dentro de un marco, como una pantalla */
+      var f = easeOut(clamp((p - HOLD) / (1 - HOLD)));
+      var sx = window.innerWidth < 760 ? 4 : 6, sy = window.innerWidth < 760 ? 10 : 9;
+      frame.style.clipPath = f > 0 ? "inset(" + (f * sy).toFixed(2) + "% " + (f * sx).toFixed(2) + "% round " + (f * 30).toFixed(1) + "px)" : "";
+      content.style.opacity = (1 - clamp(f * 1.8)).toFixed(3);
+      content.style.transform = f > 0 ? "translateY(" + (-f * 50).toFixed(1) + "px)" : "";
+      if (cue) cue.style.opacity = (1 - clamp(p * 25)).toFixed(3);
+    }
+
+    function update() {
+      ticking = false;
+      var vh = window.innerHeight, y = window.scrollY;
+      if (bar) bar.style.transform = "scaleX(" + clamp(y / (document.documentElement.scrollHeight - vh)).toFixed(4) + ")";
+      heroFX(vh);
+
+      pxImgs.forEach(function (im) {
+        var box = im.parentNode.getBoundingClientRect();
+        if (box.bottom < -100 || box.top > vh + 100) return;
+        var off = (box.top + box.height / 2 - vh / 2) / (vh / 2 + box.height / 2);
+        im.style.translate = "0 " + (-off * box.height * 0.06).toFixed(1) + "px";
+      });
+
+      if (words.length) {
+        var mr = mText.getBoundingClientRect();
+        var mp = clamp((vh * 0.85 - mr.top) / (vh * 0.85 - vh * 0.35 + mr.height * 0.6));
+        var on = Math.round(mp * words.length);
+        words.forEach(function (w, i) { w.classList.toggle("is-on", i < on); });
+      }
+
+      if (band) {
+        var br = band.getBoundingClientRect();
+        if (br.bottom > 0 && br.top < vh) {
+          var bp = (vh - br.top) / (vh + br.height);
+          band.style.transform = "translate3d(" + (-bp * Math.max(0, band.scrollWidth - window.innerWidth * 0.6)).toFixed(1) + "px,0,0)";
+        }
+      }
+
+      darks.forEach(function (d) {
+        var t = d.getBoundingClientRect().top;
+        if (t > vh * 1.1 || t < -vh) return;
+        d.style.setProperty("--in", clamp((vh * 0.92 - t) / (vh * 0.7)).toFixed(3));
+      });
+    }
+    function request() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+    window.addEventListener("scroll", request, { passive: true });
+    window.addEventListener("resize", request);
+    update();
   }
 
   /* ---------- 4. Ventanas de "Más información" ---------- */
@@ -328,7 +445,7 @@
 
   /* ---------- Arranque ---------- */
   function init() {
-    safe(applyConfig); safe(injectSchema); safe(initHeader); safe(initReveal); safe(initParallax);
+    safe(applyConfig); safe(injectSchema); safe(initHeader); safe(initSplit); safe(initReveal); safe(initScrollFX);
     safe(initServices); safe(initGallery); safe(initBeforeAfter); safe(initForm); safe(initCTAs); safe(initCookie);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
